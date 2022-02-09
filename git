@@ -22,4 +22,9 @@ git push : github 으로 옮기기
 
 SSH key 생성하기 : https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 
-git push -u origin main : 깃 옮기기
+git push -u origin main : 깃헙으로 옮기기
+
+1. git add .
+2. git commit -m ""
+3. git push -u origin main
+
