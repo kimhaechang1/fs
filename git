@@ -2,4 +2,24 @@ git init: git을 시작할 디렉토리에서 해당 명령어 실행
 
 Working directory : 처음있는 상태
 
+git add . : 모든 파일 git으로 옮기기
 
+staging area : git에서만 존재하는 실질적으로 git 저장소에 옮기기 전 파일 임시저장소
+
+.gitignore : 특정 파일을 빼고 git 저장소에 올리기
+
+git rm --cached (directory) -r : git 저장소에 특정 디렉토리 없애기
+
+*-r 옵션 : 디렉토리 안에 여러 디렉토리가 또 있다면 리컬시브하게 없애는 옵션
+
+git status : 현재 git으로 옮길 파일들 목록 (staging area)
+
+git commit -m "" : local git repository에 옮기기
+
+*-m "" 옵션 : 메시지 생성
+
+git push : github 으로 옮기기
+
+SSH key 생성하기 : https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+
+git push -u origin main : 깃 옮기기
