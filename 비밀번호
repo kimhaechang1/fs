@@ -1,0 +1,15 @@
+비밀 설정 정보 관리
+
+몽고DB 접속부분에 아이디와 비밀번호가 그대로 노출되어있다.
+
+이것을 git commit하는 순간 개인정보 노출이 이뤄진다.
+
+그래서 중요한 정보는 다른 파일로 보관후 .gitignore에 추가한다.
+
+환경 변수 process.env.NODE_ENV
+
+Local환경 : development
+
+Deploy(배포) 후 : production
+
+development 로컬 환경에서 가져가도록 하고 Deploy후 production일 때는 heroku와 같은 곳에서 가져가도록 만들어야한다.
