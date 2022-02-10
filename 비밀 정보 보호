@@ -1,0 +1,31 @@
+비밀 설정 정보 관리
+
+몽고DB 접속부분에 아이디와 비밀번호가 그대로 노출되어있다.
+
+이것을 git commit하는 순간 개인정보 노출이 이뤄진다.
+
+그래서 중요한 정보는 다른 파일로 보관후 .gitignore에 추가한다.
+
+환경 변수 process.env.NODE_ENV
+
+Local환경 : development
+
+Deploy(배포) 후 : production 모드가 된다
+
+development 로컬 환경에서 가져가도록 하고 Deploy후 production일 때는 heroku와 같은 곳에서 가져가도록 만들어야한다.
+
+config 폴더를 생성 후
+
+local 환경에서 처리 할 dev.js를 만들고 module exports를 통해 mongoURI 객체에 mongoDB 접속 주소를 저장하고
+production 환경에서 처리 할 prod.js를 만들고 module exports와 process.env를 통해 mongoURI 객체에 heroku같은 싸이트에서 쓰는 값을 넣어준다.
+
+그리고 이들의 분기점을 처리할 key.js를 만들어서 현재 프로젝트 상태(process.env.NODE_ENV)가 production모드면
+
+prod.js의 내용을 require하여 exports 해주고
+
+그것이 아니면 dev.js로 require하여 exports 해준다.
+
+(위의 상황을 단순히 설명하면 key.js는 단순히 분기점만을 제공하고, 곧바로 필요한 js 파일들(dev or prod)의 exports되어져 나오는 객체 값으로 넘어간다.)
+
+따라서 db를 연결하는 곳에서 key.js를 require 해주고 필요한 부분에 mongoURI 객체를 꺼내서 쓰면 된다.
+

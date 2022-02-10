@@ -1,0 +1,55 @@
+현재 상황은 너무 비밀번호가 안전하지 않다.
+
+그래서 Bcrypt를 이용하여 비밀 번호를 암호화 해줘서 DB에 저장해줘야함
+
+Bcrypt 사용법 : salt를 생성하고 분리된 함수 호출을 암호화시킨다.
+
+*saltRounds : salt가 몇 글자인지
+
+ex) 10자리 salt를 생성 : saltRounds = 10
+
+먼저 우리가 User 모델의 내부 메서드인 save를 통해 저장하는데 
+
+이전에 암호화를 시켜서 저장해야한다
+
+따라서 스키마를 만드는 Users.js에서
+
+userSchema.pre()를 사용한다 : 첫번째 인자로 어떤 모델의 메서드 전에 작동 할 것인지 적는다.
+두번째 인자는 콜백 함수를 사용한다.
+
+콜백함수는 여기서 pre를 처리한 후 원래 처리해야할 메서드를 인자로 사용한다.
+
+따라서 여기서는 
+
+userSchema.pre('save', function (next){})를 사용하며
+
+비밀번호가 변경되었을때만 암호화 되어야하므로 isModified를 통해 변경되었는지 확인한다.
+
+여기서 isModified 를 사용하기 위해선 userSchema를 들고 와야 하는데, 이는 this 객체를 통해 들고 올 수 있다.
+
+var user = this
+
+그리고 isModified() 메서드의 인자로는 userSchema안에 암호화가 필요한 스키마의 영역을 들고온다
+
+if(isModified('password')){}
+
+그 다음 bcrypt.genSalt(saltRounds, function(err,salt)){} 를 통해 salt를 생성한다
+
+여기서 콜백함수의 인자에 salt가 있는데 이는 생성된 salt를 의미하며
+
+salt를 생성후 어떤 방식으로 처리할 것인지 살펴보면
+
+내부에서 bcrypt.hash() 를 통해 만든 salt를 사용하여 비밀번호를 암호화 한다.
+
+첫 번째 인자로는 암호화를 시킬 영역 user.password 
+
+두 번째 인자로는 생성한 salt, 세 번째 인자로는 콜백 함수를 통해 암호화 이후 어떤일을 할 것인지 한다.
+
+user.password = hash 를 통해 암호화된 비밀번호를 스키마의 비밀번호 영역에 넣어준다.
+
+그리고 아까 가장 바깥쪽 콜백함수의 인자를 들고와 실행시킨다
+
+next()
+
+
+*salt : 암호학에서 솔트는 데이터, 비밀번호, 통과암호를 해시처리하는 단방향 함수의 추가입력으로 사용되는 랜덤데이터이다.
