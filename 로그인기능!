@@ -1,0 +1,151 @@
+1. login route 만들기
+
+app.post('/login', (req,res)=>{
+    1. 데이터베이스 안에서 요청한 E-mail 찾기
+    2. 요청된 이메일이 데이터 베이스에 있다면 비밀번호가 맞는 비밀번호인지 확인
+    3. 비밀번호 까지 같다면 Token을 생성
+    - 토큰을 생성하기 위해서는 jsonwebtoken 라이브러리 다운로드
+})
+
+login 라우트를 다 만들었으면 이제 
+
+데이터베이스 안에서 요청한 Email을 찾아야한다
+
+몽고 DB 변수 User에 내장 메서드 findOne을 사용한다
+
+User.findOne({
+    email:req.body.email, 
+    (err, user){
+        if(!user){
+            res.json({
+                loginSuccess:false
+            })
+        }
+    }
+})
+
+그리고 email이 동일하단게 확인되면 이제 패스워드가 맞는지 확인해야한다.
+
+여기서 패스워드가 맞는지 확인하려면 값을 비교해야한다
+
+먼저 사용자가 브라우저에서 입력한 값은 bcrypt에 의해 암호화된게 아니다.
+
+따라서 사용자가 입력한 password를 전에 생성한 salt를 통한 bcrypt를 활용하여
+
+암호화 하고 그 두개의 값(사용자 입력 vs DB password)이 동일하다면 패스워드가 동일하단 것이 된다.
+
+먼저 몽고 DB상에서는 두개의 값을 비교하는 메서드가 없으므로
+
+커스텀 메서드를 Users.js에 정의 해주어야한다.
+
+먼저 index.js에서 생성은 해준다.
+
+user.comparePassword(req.body.password , (err,isMatch)=>{})
+
+그리고 이 커스텀 메서드에 대한 정의를 해준다.
+
+userSchema.methods.comparePassword = function(plainPassword, cb){ 
+    bcrypt.compare(plainPassword, this.password, function(err,isMatch){
+        if(err) return cb(err)
+        cb(null, isMatch) 
+}
+
+여기서 comparePassword에 대한 함수를 정의하는데 
+
+인자로 plainPassword는 index.js에서 호출한 함수의 인자 req.body.password로 넘어간다
+
+즉 사용자가 브라우저에서 입력한 password가 넘어가고 cb는 콜백함수로 호출한 부분의 (err, isMatch)에 해당한다.
+
+내부의 bcrypt.compare() 메서드는 
+
+첫번째 인자로 비교 할 변수, 두번째 인자로 DB상의 비교대상 , 세번째 인자로 콜백함수가 온다.
+
+비교할 변수는 당연히 comparePassword의 인자인 plainPassword가 된다.
+
+두 번째 인자로 비교대상은 DB상의 스키마에 있는 password필드이므로 this.password를 가져오면 된다.(* 여기서 this는 이미 스키마 변수를 가리키고 있다.)
+
+세 번째 콜백으로 err와 isMatch가 있는데 
+
+err발생시 바깥쪽 콜백함수인 cb 즉, 호출한 함수에게 err를 넘겨주고 리턴하며
+
+정상적으로 실행되었다면 호출한 함수의 첫번째 인자가 err였으므로 그부분에 null로서 err가 없었다는것을 명시해주고
+
+isMatch의 값 즉 true가 넘어가게 된다.
+
+그리고 이러한 과정의 마지막인 호출한 함수의 콜백을 정의 해주면 끝이다.
+
+첫 번째로 아에 err는 없었지만 (*cb(null, isMatch)) isMatch쪽에 false라면 비밀번호가 틀렸다고 명시해준다.
+
+if(!isMatch)
+    return res.json({
+            loginSuccess:false,
+            message:"비밀번호가 틀렸습니다."
+    })
+
+그리고 만약 비밀번호가 맞았다면 
+
+해당하는 유저에게 특정 토큰값을 부여해야한다.
+
+이 토큰값은 json web token 라이브러리를 통해 생성한다.
+
+토큰을 만들기위한 메서드 또한 DB자체에는 없으므로 커스텀 메서드를 생성한다
+
+user.genToken((err,user)=>{})
+
+* 웹토큰
+선택적 서명 및 선택적 암호화를 사용하여 데이터를 만들기 위한 인터넷 표준
+
+작동원리
+
+1. 유저가 아이디와 비밀번호를 입력하여 로그인을 함
+2. 서버측에서 해당 계정정보를 검증
+3. 계정정보가 정확하다면 서버측에서 유저에게 토큰 발급
+4. 클라이언트 측에서 전달받은 토큰을 저장해두고, 서버에서 요청 할 때 마다, 해당토큰을 함께 서버에 전달
+5. 서버는 토큰을 검증하고 요청에 응답.
+
+해당 메서드를 Users.js에서 정의한다.
+
+userSchema.methods.genToken = function(cb){
+    var user = this
+    var token = jwt.sign(user._id.toHexString(), 'testToken1') 
+    user.token = token
+    user.save(function(err, user){ 
+        if(err) return cb(err)
+        cb(null, user) 
+    })  
+}
+
+여기서 jwt.sign()을 통해 user스키마의 _id필드를 사용한다.
+
+그리고 2번째 인자는 secretKey로서 하고싶은걸로 하면된다.
+
+그렇게 생성한 토큰은 해당 유저의 스키마에 token필드에 저장해야 나중에 그 토큰으로 인증이 가능하므로
+
+user.token = token 으로 저장해준다
+
+그리고 DB에 저장할때는 save메서드를 꼭 실행해주어야 저장이된다
+
+여기서 콜백함수로서 err가 발생하지 않는다면 cb() 즉 호출한 함수의 콜백함수에 err부분에 null을 해주고
+
+user 의 정보 즉 스키마에 담긴 정보를 호출한 함수의 콜백함수로 넘겨준다.
+
+여기서 다시 index.js 에서 생성한 genToken으로 넘어가서 콜백함수 내부를 정의한다.
+
+user.genToken((err,user)=>{ 
+    if(err) return res.status(400).send(err)
+        res.cookie("x_auth", user.token) 
+        .status(200) // 성공
+        .json({ loginSuccess:true, userId:user._id })
+})
+
+이 내부의 핵심은 cookie에 토큰을 저장한다는 것인데
+
+그러기 위해선 cookie-parser 라이브러리가 필요하다
+
+res.cookie()메서드를 통해 첫 번째 인자로 쿠키 명칭,  두번째 인자로 넣을 토큰 값을 명시해주고
+
+status 와 json 을 통해 결과 값을 출력한다.
+
+
+
+
