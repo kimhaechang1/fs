@@ -65,17 +65,36 @@ userSchema.methods.comparePassword = function(plainPassword, cb){
 }
 userSchema.methods.genToken = function(cb){
     // jsonwebtoken을 시용해서 token 을 생성한다.
-    var user = this
-    var token = jwt.sign(user._id.toHexString(), 'testToken1') // mongoDB상에 ObjectID로 되어있는 _id값을 들고옴
+    //var user = this
+    var token = jwt.sign(this._id.toHexString(), 'testToken1')
+    //var token = jwt.sign(user._id.toHexString(), 'testToken1') // mongoDB상에 ObjectID로 되어있는 _id값을 들고옴
     // user._id와 'testToken1'을 합쳐서 토큰을 만드는데
     // 나중에 토큰을 해석하는곳에 토큰을 사용하면 user._id가 나온다.
     //  따라서 token을 따로 변수에 저장해야한다.
-    user.token = token
-    user.save(function(err, user){ // DB의 스키마에 token 필드에 저장
+    this.token = token
+    //user.token = token
+    this.save(function (err,user){
+        if(err) return cb(err)
+        cb(null, user)
+    })
+    /*user.save(function(err, user){ // DB의 스키마에 token 필드에 저장
         if(err) return cb(err)
         cb(null, user) // 여기서 user는 inserted된 정보가 포함되어있다.
-    })  
+    })*/  
 }
+userSchema.statics.findByToken = function(token, cb){
+    var user = this
+    // 토큰을 디코드 한다.
+    jwt.verify(token, 'testToken1', function(err, decoded){
+        // 유저 아이디를 이용해서 유저를 찾은 다음에
+        // 클라이언트에서 가져온 token과 DB에 보관된 토큰이 일치하는지 확인
+        user.findOne({"_id":decoded, "token":token}, function(err, user){
+            if(err) return cb(err)
+            cb(null, user)
+        })
+    })
+}
+
 const User = mongoose.model('User',userSchema)
 
 module.exports = {User}

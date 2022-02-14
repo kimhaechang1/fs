@@ -6,11 +6,17 @@ const cookieParser = require('cookie-parser')
 const { User } = require('./models/Users') // 모델 불러오기
 const mongoose = require('mongoose')
 const config = require('./config/key')
+const {auth} = require('./middleware/auth')
+const { use } = require('bcrypt/promises')
+
 
 //application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended:true}))
 //application/json
 app.use(bodyParser.json())
+
+app.use(cookieParser())
+
 mongoose.connect(config.mongoURI,{
     useNewUrlParser: true, useUnifiedTopology: true
 }).then(()=> console.log('mongoDB Connected'))
@@ -18,7 +24,7 @@ mongoose.connect(config.mongoURI,{
 
 app.get('/',(req,res) => res.send('hello world'))
 
-app.post('/register',(req,res)=>{
+app.post('/api/users/register',(req,res)=>{
     // 회원가입 할 때 필요한 정보들을 client에서 가져오면
     // 그것들을 데이터 베이스에 넣어준다.
     const user = new User(req.body) // mongoDB의 모델중 User라는 이름의 모델을 들고와서 인스턴스화 시키고
@@ -30,7 +36,7 @@ app.post('/register',(req,res)=>{
         })
     }) // status 200 : 성공
 })
-app.post('/login', (req,res)=>{
+app.post('/api/users/login', (req,res)=>{
     User.findOne({ email: req.body.email}, (err, user)=>{ // DB에서 데이터 하나 찾기
         if(!user){
             return res.json({
@@ -56,5 +62,28 @@ app.post('/login', (req,res)=>{
             })
         }) 
     }) 
+})
+
+app.get('/api/users/auth',auth,(req,res)=>{ // auth : 미들웨어
+    // 여기 까지 미들웨어인 auth를 통과해 왔다는 얘기는 Authentication이 True라는 말
+
+    res.status(200).json({
+        _id: req.user._id,
+        isAdmin: req.user.role === 0 ? false : true,
+        isAuth : true,
+        email: req.user.email,
+        name : req.user.name,
+        lastname : req.user.lastname,
+        image:req.user.image
+    })
+})
+
+app.get('/api/users/logout',auth, (req, res)=>{
+    User.findOneAndUpdate({_id: req.user._id},{token:""},(err, user)=>{
+        if(err) return res.json({ success:false, err})
+        return res.status(200).send({
+            success:true
+        })
+    })
 })
 app.listen(port, ()=> console.log(`example app listening on port ${port}!`))
