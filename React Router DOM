@@ -1,0 +1,37 @@
+Router는 컴포넌트들 사이의 이동을 편하게 해준다
+
+그러기 위해서 react-router-dom 라이브러리를 설치하고
+
+App.js 에서 경로를 잡아준다.
+
+우선 다운받은 라이브러리를 import 해준다.
+
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Link
+} from "react-router-dom"
+
+BrowserRouter : history API를 사용해 URL과 UI를 동기화하는 라우터
+*history api : 브라우저의 세션기록에 접근하는 객체로서, 사용자를 방문기록 앞, 뒤로 보내거나 기록 스택의 콘텐츠를 조작할 수 있다.
+
+Routes : 원래 예전 버전에서는 Switch였으나 Routes로 네이밍이 변경되었으며
+자식컴포넌트로 오는 Route 혹은 Redirect중 매치되는 첫 번째 요소를 랜더링한다
+
+Route : 컴포넌트의 속성에 설정된 URL과 현재 경로가 일치하면 해당하는 컴포넌트, 함수를 렌더링한다.
+
+Link : 'a'태그와 비슷하며, to 속성이 설정된 링크로 이동한다
+
+가장 바깥쪽에는
+<Router></Router>로 시작한다(* 여기서는 import 할 때 BrowserRouter를 as Router 하였으므로)
+
+그리고 내부에 <div>태그로 하나 감싸고 그 내부에 <Routes>태그로 감싼다
+
+그리고 실질적으로 경로와 해당되는 컴포넌트를 랜더링하기 위해 <Route/>를 사용한다
+
+속성으로는 path 와 element가 있는데
+
+path : 경로 지정 ex) 루트 경로라면 <Route path="/"/>
+element : 렌더링 할 컴포넌트 지정 ex) About 컴포넌트를 렌더링 하려면 <Route path="/about" element={<About/>}/>
+

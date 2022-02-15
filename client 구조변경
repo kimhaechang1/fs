@@ -1,0 +1,33 @@
+client
+-node_modules
+-public
+-src
+
+for Redux : src/_action, src/_reducers 
+
+src/components
+src/components/views -> Page들을 넣음
+src/components/views/footer
+src/components/views/LoginPage
+src/components/views/NavBar
+src/components/views/RegisterPage
+src/components/views/LandingPage/Sections -> 해당 페이지에 관련된 css 파일이나 component들을 넣음
+
+src/components/App.js -> Routing 처리
+src/components/Config.js -> 환경 변수
+
+src/hoc -> 고차컴포넌트
+src/utils -> 여러군데 쓰이는 것들 모아둔 곳
+
+*고차컴포넌트 (High-order component)
+
+고차컴포넌트란 컴포넌트 하나를 인자로 받아서 새로운 컴포넌트를 리턴하는 함수이다.
+
+고차 컴포넌트의 예시
+
+Auth라는 인증 고차컴포넌트가 있고 
+
+여기서 로그인 한 유저가 logged in component에 접근하려고 한다면
+
+정상적인 페이지를 보여주지만, 로그인이 안된 유저가 접근하려고 하면 다른 페이지로 이동시켜버린다.
+

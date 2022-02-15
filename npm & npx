@@ -1,0 +1,23 @@
+NPM (Node Package manager)
+
+What is NPM?
+
+it is an online repository for the publishing of open-source Node.js projects
+오픈소스 노드js 프로젝트들의 배포를 위한 온라인 저장소 역할이며
+
+it is a command-line utility for interacting with the said repository that aids in package installation, version managment, and dependency management
+패키지 설치, 버전 및 종속성 관리를 지원하는 저장소와 상호작용 하기 위한 커멘드라인 기능을 제공합니다.
+
+npm install locally & globally
+
+npm install 을 할때 아무런 옵션을 주지 않으면 로컬로 다운된다
+
+만약 -g 옵션을 주게 되면 컴퓨터 자체에 설치된다.
+
+보통 %AppData%/npm 에 설치된다.
+
+여기서 npx는 npm 레지스트리에서 원하는 것을 다운로드 없이 가져와서 사용할 수 있다.
+
+npx Adv
+
+Disk Space를 낭비안하고, 항상 최신버전을 사용할 수 있다.
