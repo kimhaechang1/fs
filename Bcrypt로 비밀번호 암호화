@@ -4,7 +4,7 @@
 
 Bcrypt 사용법 : salt를 생성하고 분리된 함수 호출을 암호화시킨다.
 
-*saltRounds : salt가 몇 글자인지
+*saltRounds = salt가 몇 글자 인가?
 
 ex) 10자리 salt를 생성 : saltRounds = 10
 
