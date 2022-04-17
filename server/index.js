@@ -25,7 +25,7 @@ mongoose.connect(config.mongoURI,{
 app.get('/',(req,res) => res.send('hello world'))
 
 app.get('/api/hello',(req,res)=>{
-    res.send("안녕하세요")
+    res.send("서버사이드, 확인 했습니다. ㅎㅇ요")
 })
 
 app.post('/api/users/register',(req,res)=>{
@@ -48,7 +48,8 @@ app.post('/api/users/login', (req,res)=>{
                 message:"제공된 이메일에 해당하는 유저가 없습니다."
             })
         }
-        user.comparePassword(req.body.password , (err,isMatch)=>{// DB에서 이메일 비교가 성공한 후 패스워드 비교
+        user.comparePassword(req.body.password , (err,isMatch)=>{
+            // DB에서 이메일 비교가 성공한 후 패스워드 비교
             // 이 메소드는 기본적으로 몽고DB 스키마에서 제공하는 메소드가 아닌 커스텀 메소드기때문에
             // userSchema.methods.comparePassword로 만들어줘야한다.
             if(!isMatch)
