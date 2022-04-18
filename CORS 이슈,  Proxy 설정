@@ -1,0 +1,96 @@
+CORS 정책
+
+Cross-Origin Resource Sharing (CORS)
+
+HTTP 요청에 대해서 어떤 요청을 하느냐에 따라 각기 다른 특징이 있음
+
+XMLHttpRequest나 Fetch API등에서 Same-Origin Policy 를 따른다.
+
+결국 자바스크립트는 서로 다른 도메인에 대한 요청을 보안상 제한하게 된다.
+
+이 서로다른 도메인 즉 출처(origin)는
+
+URL에서 Protocol, Host, Port부분을 모두 합친것을 의미한다.
+
+Location 객체의 origin 프로퍼티에 접근하면 현재 출처를 알 수 있다.
+
+여기서 브라우저는 Protocol, Port, Host중 하나라도 일치하지 않으면 Cross-Orgin으로 인식한다.
+
+CORS의 기본 동작과정은
+
+1. 클라이언트에서 HTTP 요청의 헤더에 Origin 즉 출처를 담아 전달한다.
+
+ex) Origin : http://localhost:3000
+
+2. 서버는 이러한 클라이언트의 요청의 응답헤더에 Access-Control-Allow-Origin을 담아 클라이언트로 전달
+
+ex) Access-Control-Allow-Origin : http://localhost:3000
+
+3. 클라이언트에서 자신이 보냈던 요청의 Origin과 서버가 보내준 Access-Control-Allow-Origin을 비교한다.
+
+여기서 서버는 정상적으로 응답했다는 코드 200을 보내더라도 브라우저가 CORS 정책여부와 관련 있다는 점이 중요하다.
+
+(위의 예시문은 서버와 클라이언트의 출처가 동일한 경우 이므로 유효한 경우이다.)
+
+여기서 이제 실제로 CORS정책이 일어나는 시나리오는 총 세가지로 볼 수있다.
+
+1. 예비 요청(Preflight Req)
+
+예비요청은 서버의 데이터를 변경해버리는 요청과 같은  PUT/DELETE와 같은 요청에서 발생하며
+
+우선 본 요청을 하기 전 예비요청을 보내 서버에서 어떤 것을 금지하고 있는지에 대한 정보를 받으면
+
+해당 요청이 안전한지 확인 후 본요청을 보낸다.
+
+2. 단순요청 (Simple Req)
+
+GET, HEAD, POST와 같은 단순 요청일 경우 해당됨
+
+3. 인증 된 요청 (Credentialed Req)
+
+기본적으로 브라우저가 제공하는 비동기 리소스 요청 api인
+
+XMLHttpRequest나 Fetch API는 별도의 옵션 없이 브라우저의 쿠키정보나 인증과 관련된 헤더를 함부러 요청에 담지 않는다.
+
+따라서 요청에 인증과 관련된 정보를 담을 수 있게 해주는 옵션 credentials 옵션을 사용한다.
+
+same-origin(기본값) : 같은 출처간에만 인증정보를 담을 수 있다.
+include : 모든 요청에 인증 정보를 담을 수 있다.
+omit : 모든 요청에 인증 정보를 담지 않는다.
+* axios는 withCredential:true를 사용하여 쿠키전송 가능
+ex)
+fetch('URL',{
+    method:"PUT",
+    credentials:"include"
+}).
+then((response)=>{
+    ///
+}).
+catch((err)=>{
+
+})
+
+따라서 Proxy를 사용하여 해결한다.
+
+React를 사용하는경우 모듈을 다운받는것 외에 추가로 메뉴얼하게 설정해야한다.
+
+1. npm install http-proxy-middleware --save
+
+다음 src폴더를 만들고 그 아래에 setupProxy.js를 만든다.
+
+마지막으로 아래의 코드를 작성한다.
+
+const proxy = require('http-proxy-middleware')
+
+module.exports=function(app){
+    app.use('/api',proxy({
+        target:'http://localhost:포트번호'
+        changeOrigin:true,
+    }))
+
+    
+}
+
+
+
+
