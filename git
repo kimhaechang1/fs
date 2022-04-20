@@ -29,13 +29,13 @@ git push -u origin main : 깃헙으로 옮기기
 3. git push -u origin main
 
 
-기존의 리포지토리에서 다른 리포지토리로 변경 할 때
-git remote show 를 통해 확인한다.
-origin이 이미 존재한다면
-git remote rm origin 을 통해 삭제한다.
+원격 저장소 확인 : git remote -v 를 통해 확인한다.
 
-만약 git repository가 아니라는 에러가 뜬다면
-git init을 통해 git repository로 만들어준다. 
+원격 저장소 삭제  : git remote rm (이름)
+
+원격 저장소 생성 : git init
+
+원격 저장소 추가 : git remote add <저장소 이름> <저장소 주소>
 
 그 다음 git remote add origin <SSH주소>를 입력한다.
 
