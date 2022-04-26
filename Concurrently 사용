@@ -1,0 +1,22 @@
+기존의 프론트서버와 백 서버는 따로 node js 명령어를 통해 켜 주었다.
+
+이러한 귀찮음을 한번에 해결하기 위해 concurrently 라이브러리를 다운받아서 써 보도록 하자.
+
+
+*주의 : 프로젝트폴더 즉 가장 바깥쪽에서 실행 해 줄것
+npm i concurrently --save
+
+다운이 완료 되었으면
+
+서버사이드쪽 package.json에 들어가서
+scripts 부분에
+
+"원하는 스크립트 명" : "concurrently \"npm run backend\" \"npm run start --prefix client\""
+
+을 추가해준다.
+
+이것으로서 두개의 명령어가 함께 실행 되는 것이다.
+
+* --prefix <경로>
+
+특정 폴더에 npm 명령어를 실행시키 위한 옵션

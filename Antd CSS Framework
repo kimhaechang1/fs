@@ -1,0 +1,31 @@
+CSS 프레임워크를 사용하여 기능에 좀 더 집중한다.
+
+CSS Framework의 종류 (React JS)
+
+1. Meterial UI
+2. React Boostrap
+3. Semantic UI
+4. Ant Design
+5. Materialize 
+...
+
+이 중에서 이번 프로젝트에서는 AntDesign 을 사용한다.
+
+프레임웤 자체는 무겁지만 사용성이 편하고 디자인이 깔끔하며 
+
+다양한 엔터프라이즈 환경에서도 사용이 가능하다.
+
+https://ant.design/
+
+React JS 기준으로 각종 컴포넌트 들을 바로바로 복붙 식으로 들고 올 수 있다.
+
+결국 React의 dependency기 때문에
+
+client 폴더로 이동하여 npm을 통해 설치 해 준다.
+
+npm install antd
+
+다운이 완료 된 후 사용법은
+
+import 'antd/dist/antd.css'
+

@@ -1,5 +1,6 @@
 import React, {useEffect}  from 'react'
 import axios from 'axios'
+import {DatePicker} from 'antd'
 function LandingPage(props) {
    useEffect(()=>{
        axios.get('/api/hello')
@@ -7,7 +8,7 @@ function LandingPage(props) {
    },[])
     return (
         <div>
-            랜딩페이지
+            <DatePicker/>
         </div>
     );
 }
