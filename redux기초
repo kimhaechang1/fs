@@ -1,0 +1,124 @@
+Redux : predictable state container for JavaScript apps
+= 상태 관리 라이브러리
+
+* State와 Props
+
+Props(=Property)
+
+부모 컴포넌트와 자식컴포넌트 사이에 어떤 값이나 데이터를 주고받을 때 쓴다.
+
+부모 컴포넌트에서의 props 값은 자식컴포넌트로 물려줄수 있는데,
+
+이때 Props값은 자식 컴포넌트 입장에서는 불변의 값이다.
+
+그럼에도 불구하고 이러한 Props값을 바꾸고 싶다면 부모 컴포넌트에서 바뀐 값을 물려주어야 한다.
+
+ex)
+<ChatMessages
+    messages={messages}
+    currentMember={member}
+    />
+여기서 messages와 currentMember가 Props에 해당하고
+중괄호 속에 있는 것들은 그 속성의 값이 된다.
+
+State
+
+부모 - 자식 관계가 아니라 컴포넌트 내부에서 데이터를 주고 받을 때 쓴다.
+
+ex) 검색 창에 글을 입력할때 글이 변하는 것은 state로 바꿈
+
+그리고 State는 변할수 있는 값이며, 변하게 되면 re-render 하게 된다.
+
+ex) state = {
+    message: '',
+    attachFile: undefined,
+    openMenu:false,
+}
+
+Redux의 특징
+
+ex) 상위에서 하위로 구성되어 있는 컴포넌트가 있다.
+
+여기서 최하위 컴포넌트에서 state에 대한 변경을 하게 된다면...
+
+Redux가 없는 경우에서는 상위로 올라가면서 전부 반영하고 최상위에서 다시 최하위로 또 내려가고...
+
+하지만 Redux는 State를 저장하는 Store 가 있기에 최하위 컴포넌트에서 최상위로 순차적으로 올라갈 필요가 없이
+
+Store를 통해 해결 할 수 있다.
+
+Redux 데이터 (strict unidirectional data flow : 엄격하게 한방향으로만 데이터 흐름이 있다.)
+
+1. ReactComponent -> Dispatch(action)-> 2. Action -> 3. Reducer -> 4. Store -> Subscribe -> 1. ReactComponent
+
+Action : 무엇이 일어났는지를 설명하는 객체
+
+ex)
+{type : 'FETCH_USER_SUCCESS', response {id : 3, name: 'Mary'}}
+User의 정보를 가져오는데 성공했다 라는것을 알림
+
+Reducer : 어떻게 상태가 변했는지를 정의 한 함수
+
+(previousState, action) => nextState : 이전 State와 action object를 받은 후에  next state를 return 한다.
+
+ex) 
+export default (state = {value : 0}, action) =>{
+    switch(action.type){
+        case ADD_VALUE:
+            return {...state, value: state.value + action.payload}
+        default:
+            return state
+    }
+}
+
+*Reducer의 규칙
+
+새로운 상태 값은 state와 action 인자값을 기반으로 계산된다
+
+현재 존재하는 state 를 변조할순 없다. 
+
+다만 불변의 값을 현재 존재하는 state를 복사하고 복사된 값들을 변경하여 업데이트 할 수 있다.
+
+ex) 
+Illegal : state.value = 123 
+
+return {
+    ...state, // 현재 존재하는 state를 복사하고
+    value : 123 // 복사 된 값들을 변경하는 것으로 업데이트 한다.
+}
+
+
+비동기 로직 혹은 side-effect(부작용)들을 허용하지 않는다.
+
+여기서 말하는 부작용은 함수로부터 반환하는 값 외에 보여지는 행동이나 상태에 대한 변화를 의미한다.
+
+ 콘솔에 값 logging
+ 파일 저장, 비동기 타이머
+ AJAX HTTP 리퀘스트
+ 함수 외부에 존재하는 일부 상태 수정 또는 함수에 대한 인수 변경
+ 난수 또는 고유한 임의 ID생성 ex) Math.random() or Date.now()
+
+이러한 규칙을 따르는 모든 함수는 "순수 함수" 라고 한다.
+
+왜 이러한 규칙을 따라야 하는가?
+
+Redux의 목표 중 하나는 너의 코드를 예측가능하게 만드는 것이다.
+
+함수의 출력 값이 단지 입력 인자로 계산될때 그 코드가 어떻게 작동하는지 그리고 테스트 하는것까지 더욱 쉬워진다.
+
+또 다른 이점은, 만약 함수가 자체적인 외부 변수에 의존한다거나 무작위 행동에 의존한다면
+
+그것을 실행시킬때 무엇이 일어나는지 알수가 없다.
+
+만약 함수가 다른 변수를 변화시킨다면 "상태를 업데이트 했지만 UI는 업데이트 되지 않았어!" 하는 버그를 일으킬수도 있다.
+
+레퍼 런스 : https://redux.js.org/tutorials/fundamentals/part-3-state-actions-reducers
+
+
+Store : 어플리케이션의 모든 state를 감싸는 저장소 역할이다.
+내부의 state를 바꾸는 유일한 방법은 action을 dispatch 하면 된다.
+store는 클래스가 아니며 단지 몇가지 메서드를 포함하고 있는 객체이다.
+
+
+
+

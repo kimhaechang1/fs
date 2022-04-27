@@ -1,0 +1,67 @@
+Redux 세팅하기
+
+redux, react-redux, redux-promis, redux-thunk 다운받기
+
+*redux-middleware
+
+일반적으로 redux의 동작원리는 reactComponent에서 dispatch를 통한 action을 통해 reducer를 호출하는데
+
+이때 reducer가 호출되어 store에 state를 바꾸기 전에 동작하는 것이 middleware이다.
+
+redux-middleware에는 보통 Redux Thunk와 Redux-saga 등이 있다.
+
+보통 상태 data(state)는 DB에 저장되어 있기 때문에 API 통신을 통해 백엔드에서 가져오게 된다.
+
+그렇기에 결국 비동기 통신으로 가져와야 하므로 미들웨어가 쓰이게 된다.
+
+**Redux Thunk
+
+Redux Thunk는 액션 생성자가 리턴하는 것을 객체가 아닌 함수를 사용 할 수 있게 한다.
+
+즉, 기존에 액션 생성자가 리턴하는 객체로는 처리하지 못했던 비동기 작업을 
+
+Redux Thunk를 사용하면서 일반 함수를 리턴할 수 있게 됨으로서 일반함수에서 가능한 모든 동작들이 가능해진다.
+
+이러한 일반함수에서의 동작중에 비동기 통신 작업이 가능해진다.
+
+ex) 
+export const login = (dataToSubmit) => async dispatch => {
+    const response = await axios.post(`api/users/login`, dataToSubmit)
+
+    dispatch({type:'LOGIN', payload:response})
+}
+
+login 액션 생성자가 dispatch가 되어 가지고 온 파라미터로 Post 요청을 보낸 뒤에
+
+서버에서 response 해준 값을 액션으로 다시 reducer 에 호출 되어 전달 해 준다.
+
+여기서 주목 할 점은 response는 Promise 객체이다.
+
+미들웨어를 사용하지 않은 경우라면 그대로 통신을 완료하지 않은 Promise 객체를 payload로 보내겠지만 (비동기 때문에 기다려 주지않음)
+
+async / await에 사용으로 동기적으로 사용할 수 있게 해준다.
+
+즉, post 요청으로 통신 후 서버로부터 response로 promise 객체를 받을 때 까지 기다렸다가 payload에 실어서 reducer에 전달 할 수 있다.
+
+사실 Redux Thunk는 비동기 처리를 위한 미들웨어 보다는 함수를 반환 할 수 있다는 점에 주목해야 하고
+
+비동기 통신에만 집중되는 middleware는 Redux Promise이다.
+
+**Redux Promise
+
+ex)
+export const userInfo = (body) =>{
+    const request = axios.post('/api/users/userlist',body)
+        .then(response => response.data)
+    return{
+        type : USER_INFO,
+        payload: request
+    }
+}
+
+굳이 async / await을 쓰지 않더라도 통신이 끝난 후 까지 기다렸다가 
+
+응답받은 Promise 객체가 있는 request변수를 reducer 에 payload로 흘려 보낸다.
+
+https://tried.tistory.com/86
+
