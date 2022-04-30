@@ -3,13 +3,24 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-
+import {Provider} from 'react-redux'
 import 'antd/dist/antd.min.css'
+import { applyMiddleware, createStore, compose } from 'redux'; // redux에서 미들웨어 적용한 store 생성
+import promiseMiddleware from 'redux-promise'
+import ReduxThunk from 'redux-thunk'
+import reducer from './_reducers'
+
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION__ || compose
+const store = createStore(reducer, composeEnhancers(applyMiddleware(promiseMiddleware, ReduxThunk)))
+
 
 ReactDOM.render(
-  <React.StrictMode>
+  <Provider
+    store={store}
+  >
     <App />
-  </React.StrictMode>,
+  </Provider>,
   document.getElementById('root')
 );
 

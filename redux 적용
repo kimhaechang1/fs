@@ -65,3 +65,60 @@ export const userInfo = (body) =>{
 
 https://tried.tistory.com/86
 
+다운받는것이 모두 끝났다면
+
+메인페이지인 index.js에서 react-redux의 provider를 import 한다.
+
+redux에서 createStore와 applymiddleware, compose를 import 한다.
+
+그 다음 redux-middleware인 ReduxThunk와 Redux-promise를 import 한다.
+
+여기서 store에서 직접적인 state 변경이 이뤄지기 전에 동작하는것이 미들웨어 라고 한다면
+
+store쪽에 적용이 되어야 할 것이다.
+
+따라서 createStore를 통해 redux-store를 정의 하기 전 적용해야한다.
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION__ || compose
+
+const store = createStore(reducer, composeEnhancers(applyMiddleware(promiseMiddleware, ReduxThunk)))
+
+그리고 chrome의 extension기능 중 하나인 redux DevTool와 연동을 위해 composeEnhancer가 필요하다
+
+https://github.com/reduxjs/redux-devtools/tree/main/extension
+
+마지막으로 store를 정의 한다.
+
+store정의 할 때 applyMiddleware를 통해 redux-thunk 와 redux-promise를 넣어준다.
+
+*compose : 각각의 함수들을 조합한다, 각각의 함수의 반환값은 왼쪽에 있는 함수의 인수로 제공되는 식으로 연속된다.
+
+그리고 해당하는 store를 실제 페이지에 적용하기 위해서는 <Provider/>로 메인페이지인 <App/>을 둘러싸야한다.
+
+그리고 Provider의 속성으로 store가 있는데 이곳에다가 정의한 store를 넣어주면 된다
+
+<Provider
+    store={store}
+/>
+
+이렇게 되면 정의된 reducer에 의해 action들에 따라 store의 state가 달라질 것이다.
+
+이러한 reducer를 정의 하는 곳은 ./_reducer 에서 하게 될 것이다.
+
+여기에서 index.js를 만들고 reducer를 정의한다.
+
+import { combineReducers } from "redux"
+//import user from './user_reducer'
+
+const rootReducer = combineReducers({
+
+})
+
+
+export default rootReducer
+
+*combineReducers : 
+reducer가 많아짐에 따라 리듀싱 함수를 독립적으로 정의 할때
+서로다른 리듀싱 함수들을 값으로 가지는 객체를 받아서 createStore에 넘길수 있는 하나의 리듀싱 함수로 바꾸어 준다.
+
+
