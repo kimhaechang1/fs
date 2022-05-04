@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import {Input, Button, Form} from 'antd'
+import {useDispatch} from 'react-redux'
+import {loginUser} from '../../../_action/user_action'
 function LoginPage(props) {
-    const [Email,setEmail] = useState("")
-    const [Password, setPassword] = useState("")
+    const dispatch = useDispatch()
+
+    const [Email, setEmail] = useState("")
+    const [Password,setPassword] = useState("")
 
     const onEmailHandler = (e) =>{
         setEmail(e.target.value)
@@ -12,27 +16,31 @@ function LoginPage(props) {
     }
     const onSubmitHandler = (e) =>{
         e.preventDefault()
+        
+        let body={
+            email:Email,
+            password:Password
+        }
+        dispatch(loginUser(body))
+        
 
-        console.log("email",Email)
-        console.log("Password",Password)
     }
-
+    
     return (
         <div style={{
             display:'flex', justifyContent:'center',alignItems:'center'
             , width:'100%',height:'100vh'}}>
             <form style={{display:'flex', flexDirection:'column'}}
-                onSubmit={onSubmitHandler}
+            onSubmit={onSubmitHandler}
             >
                 <label>Email</label>
-                <input type="email" value={Email} onChange={onEmailHandler}/>
+                <input type="email" value = {Email} onChange={onEmailHandler}/>
                 <label>Password</label>
                 <input type="password" value={Password} onChange={onPasswordHandler}/>
                 <br/>
-                <button>
-                    Login
-                </button>
+                <button>Submit</button>
             </form>
+
         </div>
     );
 }

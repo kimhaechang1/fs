@@ -57,7 +57,7 @@ app.post('/api/users/login', (req,res)=>{
                     loginSuccess:false,
                     message:"비밀번호가 틀렸습니다."
                 })
-            user.genToken((err,user)=>{ // 비밀번호가 만드는 것에 성공하였다면 토큰을 생성하는 커스텀함수
+            user.genToken((err,user)=>{ // 비밀번호를 검증하는 것에 성공하였다면 토큰을 생성하는 커스텀함수
                 if(err) return res.status(400).send(err)
                 // 토큰을 저장한다. 어디에? 쿠키, 로컬스토리지 등등
                 // 쿠키에 저장하기위해 cookie-parser 을 다운받는다
