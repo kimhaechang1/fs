@@ -1,12 +1,10 @@
 import axios from "axios";
-import { response } from "express";
 import {LOGIN_USER} from "../_action/types"
 
 export function loginUser(dataToSubmit){ 
     // action은 type과 payload(response)를 반환한다.
-
     const request = axios.post('/api/users/login',dataToSubmit)
-        .then(res => 
+        .then(response => 
             response.data // request = response.data
         )
     return {

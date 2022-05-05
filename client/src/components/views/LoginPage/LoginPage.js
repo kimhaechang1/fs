@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import {Input, Button, Form} from 'antd'
 import {useDispatch} from 'react-redux'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 import {loginUser} from '../../../_action/user_action'
 function LoginPage(props) {
     const dispatch = useDispatch()
-
+    const navigate = useNavigate()
     const [Email, setEmail] = useState("")
     const [Password,setPassword] = useState("")
 
@@ -16,14 +18,30 @@ function LoginPage(props) {
     }
     const onSubmitHandler = (e) =>{
         e.preventDefault()
-        
         let body={
             email:Email,
             password:Password
         }
-        dispatch(loginUser(body))
+        const c =dispatch(loginUser(body))
+        c.payload.then(
+            response =>{
+                if(response.loginSuccess){
+                    navigate("/")
+                }else{
+                    alert(response.message)
+                }
+            }
+        )
         
-
+        /*axios.post('/api/users/login',body)
+        .then(response => {
+            console.log(response.data.loginSuccess)
+            if(response.data.loginSuccess){
+                navigate("/")
+            }else{
+                alert('Error')
+            }
+        }) login test */
     }
     
     return (

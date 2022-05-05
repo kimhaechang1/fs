@@ -119,3 +119,191 @@ const onPasswordHandler = (e) =>{
 
 따라서 submit이벤트의 기본적인 일 중 리프레쉬를 막아주는 역할을 한다.
 
+이제 redux를 사용 할 시간이 왔다!
+
+앞서 배웠던 redux의 처리과정을 다시 생각해보면
+
+1. dispatch(action) : 어떤 액션을 dispatch 한다
+
+2. action({type : , payload : }) : 어떤 종류의 액션인지, 액션을 취한 후 어떤 값을 받아왔는지
+
+3. reducer(previousState=initState, action) : 이전의 state를 복사하여 store에 저장할 새로운 state 만듬
+
+이러한 일연의 과정들을 순서에 맞게 구현한다.
+
+1. dispatch(action)
+
+dispatch는 react-redux에서 useDispatch()함수를 받아와서 넣어준다.
+
+import {useDispatch} from 'react-redux'
+
+const dispatch = useDispatch()
+
+우선 우리는 loginUser라는 액션을 구현 할 것이므로 일단 있다고 생각하고 dispatch의 인자로 넘겨준다.
+
+*참고 : loginUser는 _action/user_action.js 에서 export될 것
+
+dispatch(loginUser())
+
+그런데 우리가 action의 입장에서 생각해보면 action에서 실질적인 데이터가 오고 가는것이 일어 날 것이다.
+
+로그인 기능에서 우리가 특정 데이터를 넘겨 주어야 하기 때문에 
+
+state의 Email 과 password를 넘겨 주어야 한다.
+
+let body = {
+    email : Email,
+    password : Password
+}
+
+dispatch(loginUser(body))
+
+2. Action
+
+다음으로는 Action이다
+
+_action 디렉토리에 types.js 와 user_action.js를 만든다
+
+types.js는 이름에서 알 수 있듯이 단순히 string 타입의 type name들만 정의 되어있다.
+
+여기서는 type명을 "user_login"으로 사용 할 것이므로
+
+변수 LOGIN_USER에 저장 해두고 export 해 준다.
+
+* export default vs export
+
+export default로 선언된 모듈은 하나의 파일에서 단 하나의 변수 또는 클래스 만  export 할 수 있다.
+
+그리고 다른 파일에서 import 해줄 때 아무 이름으로 import 가 가능하다.
+
+단, var / let / const를 바로 export default 할 수 없다.
+
+named export로 선언된 모듈은 한 파일 내에서 여러 변수/ 클래스 등등을 export 하는 것이 가능하다.
+
+다만 import시 {}안에다가 export 된 이름과 동일하게 설정해야 한다.
+
+다른 이름으로 사용 할 수는 있으나 as 키워드를 사용해야 한다.
+
+https://medium.com/@_diana_lee/default-export%EC%99%80-named-export-%EC%B0%A8%EC%9D%B4%EC%A0%90-38fa5d7f57d4
+
+export const LOGIN_USER = "login_user"
+
+이제 이러한 type name을 가진 action을 정의 한다.
+
+axios를 import 하고 post요청으로 인자로 넘겨받은 데이터를 백엔드 서버에 보내고
+
+json 형태의 response data를 payload에 실어 보낸다.
+
+
+import axios from 'axios'
+import {LOGIN_USER} from './types.js'
+
+export function (dataToSubmit){
+    const request = axios.post('/api/users/login',dataToSubmit)
+    .then(response => response.data)
+
+    return (
+        {
+            type : LOGIN_USER,
+            payload : request
+        }
+    )
+}
+
+이러한 형태의 action 객체는 reducer로 흘러가게 된다
+
+3. reducer
+
+_reducers 디렉토리에서
+
+index.js와 user_reducer.js 파일을 만들어준다.
+
+여기서의 index.js의 역할은 combineReducer 인데
+
+이는 reducer의 종류가 너무 많아져서 reducer들을 따로 모듈화 하여 분리하였을때
+
+해당하는 reducer모듈들을 하나에 모아서 관리하는 용도이다.
+
+redux에서 import 해주고, 실질적인 reducer 인 user_reducer또한 import 한다.
+
+import user from './user_reducer.js'
+import {combineReducers}  from 'redux'
+
+const rootReducer = combineReducers({
+    user
+})
+
+export default rootReducer
+
+
+이제 user_reducer의 기능을 생각 해 보면
+
+reducer이므로 previousState와 action Object를 받아서 store에 넘겨주는 역할을 수행한다.
+
+이제 어떠한 action인지에 따라 action자체를 수행 한 후 loginSuccess 값을 수정한다.
+
+...previousState 는 인자로 넘어온 모든 이전의 state값을 의미하고
+
+loginSuccess는 로그인이 성사되었는지를 정의하는 새로운 state이고 이는 결국 action에서 axios요청의 결과가 담겨져 있는 payload에 해당한다.
+
+import {LOGIN_USER} from '../../_actin/types'
+export function(previousState={}, action){
+    switch(action.type){
+        case LOGIN_USER:
+            return {...previousState, loginSuccess:action.payload}
+            break;
+        default:
+            return previousState
+    }
+}
+
+결국 이러한 action.payload는 axios.post의 결과이고
+
+이는 결국 promise 객체임을 의미한다.
+
+만약 db상에 있는 email와 password 값을 통해 입력한 결과로서 백엔드에서 보내져온 메세지를 확인 해 보면 
+
+loginSuccess{
+    loginSuccess : true,
+    userId : "////"
+}
+
+으로 되어있다.
+
+여기서 우리는 loginSuccess가 true가면 기본 페이지인 LandingPage로 넘어가게 하려고 한다.
+
+이를 위해서 우리는 react-router-dom에서 useNavigate를 import한다.
+
+useNavigate는 기본적으로 두가지 인자를 받을 수 있는데
+
+하나는 url이고 나머지 하나는 {replace, state}를 받는다.
+
+url은 말그대로 Router로 정의되어 있는 Routes들 중 Route의 path속성으로 정의되어 있는것과 동일한 의미를 가진다.
+
+{replace : true} 라면 뒤로가기를 눌러도 방금 페이지로 돌아오지 않게 된다.
+
+false가 기본으로 정의되어 있다.
+
+여기서 useNavigate는 navigate 변수에 저장해둔다.
+
+https://reactrouter.com/docs/en/v6/api#usenavigate
+
+따라서 dispatch의 결과 값 속 payload는 promise 객체로 되어 있을 것 이고
+
+이러한 promise 객체 속 loginSuccess가 true일 경우에만 LandingPage를 load하고
+
+아닐 경우 무엇이 잘못 되었는지가 저장되어있는 message를 출력한다.
+
+*loginsSuccess.message : server/index.js 속 /api/users/login 참고
+
+const c = dispatch(loginUser(body))
+
+c.payload.then(
+    response =>{
+        if(response.loginSuccess){
+            navigate("/")
+        }else{
+            alert(response.message)
+        }
+})
+

@@ -73,6 +73,12 @@ redux에서 createStore와 applymiddleware, compose를 import 한다.
 
 그 다음 redux-middleware인 ReduxThunk와 Redux-promise를 import 한다.
 
+마지막으로 rootReducer 를 import 한다.
+
+rootReducer는 './_reducers' 디렉토리에 combineReducers를 활용하여 reducer 모듈들을 관리하는
+
+index.js에 정의되어있다.
+
 여기서 store에서 직접적인 state 변경이 이뤄지기 전에 동작하는것이 미들웨어 라고 한다면
 
 store쪽에 적용이 되어야 할 것이다.
@@ -103,9 +109,9 @@ store정의 할 때 applyMiddleware를 통해 redux-thunk 와 redux-promise를 �
 
 이렇게 되면 정의된 reducer에 의해 action들에 따라 store의 state가 달라질 것이다.
 
-이러한 reducer를 정의 하는 곳은 ./_reducer 에서 하게 될 것이다.
+이제 rootReducer를 정의한다.
 
-여기에서 index.js를 만들고 reducer를 정의한다.
+'./_reducers/index.js'에서 
 
 import { combineReducers } from "redux"
 //import user from './user_reducer'
