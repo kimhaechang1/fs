@@ -17,22 +17,22 @@ function LoginPage(props) {
         setPassword(e.target.value)
     }
     const onSubmitHandler = (e) =>{
-        e.preventDefault()
-        let body={
+        let data = {
             email:Email,
             password:Password
         }
-        const c =dispatch(loginUser(body))
+        e.preventDefault()
+        const c = dispatch(loginUser(data))
         c.payload.then(
-            response =>{
-                if(response.loginSuccess){
+            data =>{
+                if(data.loginSuccess){
                     navigate("/")
                 }else{
-                    alert(response.message)
+                    alert(data.message)
                 }
             }
         )
-        
+
         /*axios.post('/api/users/login',body)
         .then(response => {
             console.log(response.data.loginSuccess)
