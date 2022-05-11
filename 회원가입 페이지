@@ -1,0 +1,138 @@
+redux(React-redux(Provider, useDispatch), redux(compose, createStore, applyWithMiddleware))를 활용하여 간단한 회원가입 페이지를 만든다.
+
+요소로는
+
+이메일, 이름, 비밀번호, 비밀번호 확인, 확인 이 있을 것
+
+해당하는 요소들을 <form>을 활용하여 추가 해준다.
+
+function registerPage(props){
+    return (
+        <div style={{
+            display:'flex',
+            justifyContent:'center',
+            alignItems : 'center',
+            width: "100%",
+            height:"100vh"
+        }}>
+            <form style={{
+                display:'flex', flexDirection:'column'
+            }} onSubmit={onSubmitHandler}>
+                <label>Email</label>
+                <input type="email" value ={Email} onChange={onEmailHandler}/>
+                <label>Name</label>
+                <input type="text" value ={Name} onChange={onNameHandler}/>
+                <label>Password</label>
+                <input type="password" value={Password} onChange={onPasswordHandler}/>
+                <label>Confirm Password</label>
+                <input type="password" value={ConfirmPassword} onChange={onConfirmPasswordHandler}/>
+                <br/>
+                <button type="submit">회원 가입</button>
+
+            </form>
+
+        </div>
+    )
+}
+
+여기서 useState 를 통해 Email, Name, Password, ConfirmPassword를 정의하고 해당하는 이벤트 헨들러 또한 정의한다.
+
+...
+const [Email,setEmail] = useState("")
+    const [Password, setPassword] = useState("")
+    const [Name, setName] = useState("")
+    const [ConfirmPassword, setConfirmPassword] = useState("")
+
+    const onSubmitHandler = (e) =>{
+        if (Password !==ConfirmPassword){
+            return alert('비밀번호와 비밀번호 확인은 같아야 합니다.')
+        }
+        e.preventDefault()
+
+        let body = {
+            email : Email,
+            password : Password,
+            name : Name
+        }
+        
+    }
+    const onNameHandler = (e) =>{
+        setName(e.target.value)
+    }
+    const onEmailHandler= (e) =>{
+        setEmail(e.target.value)
+    }
+
+    const onPasswordHandler = (e) =>{
+        setPassword(e.target.value)
+    }
+    const onConfirmPasswordHandler=(e)=>{
+        setConfirmPassword(e.target.value)
+    }
+...
+
+여기서 loginPage 와는 다른 점은
+
+우선 state 값에 ConfirmPassword와 Name 가 추가되었다.
+
+더욱 중요한 점은
+
+Password와 ConfirmPassword가 같아야 해당하는 유저의 정보를 백엔드 서버로 보낼 수 있어야 한다.
+
+따라서 type = submit 인 button 을 누르는 순간 form 에 이벤트 헨들러가 작동하여
+
+ConfirmPassword와 Password가 같은지 확인하여야 한다.
+
+이제 redux를 써야한다.
+
+우리가 submit을 통해 보내는 데이터들은 react-redux의 useDispatch를 통해 알맞은 action이 취해지고
+
+그러한 action 객체를 가지고 reducer로 흘러들어가서 최종 변경된 newState를 리턴받는다.
+
+우선 action을 정의하기 위해 action의 type부분만을 정의하는 types에 REGISTER_USER에 해당하는 변수를 export 시킨다.
+
+export const REGISTER_USER = "register_user"
+
+그리고 실질적인 action을 user_action.js에서 구현한다.
+
+당연히 import 를 통해 types에서 정의한 type명을 불러와야한다.
+
+export function registerUser(dataToSubmit){
+    const request = axios.post('/api/users/register', dataToSubmit)
+        .then(res =>
+            res.data)
+    return{
+        type:REGISTER_USER,
+        payload:request
+    }
+}
+
+
+이렇게 정의된 action객체를 받아 newState 를 만들어서 store에 저장 하는 reducer를 정의해야한다.
+
+user_reducer에서 새로운 action.type에 대한 case를 추가하고 action의 결과값이 담겨져 있는 action.payload값을 새로운 state에 저장한다.
+
+...
+case REGISTER_USER:
+    return {registerSuccess:{...action.payload}}
+    break;
+...
+
+이렇게 하면 redux의 기능은 전부 구현했다.
+
+이제 마지막으로 다시 RegisterPage.js로 돌아가서 redirect할 경로를 지정해주면 된다.
+
+redirect는 react-router-dom에 있는 useNavigate를 활용하여 경로는 "/login"으로 지정한다.
+
+이러한 로직은 dispatch를 통해 return된 promise객체를 .then을 통해 그 세부값 중 백엔드 서버로 부터 받은 {success:}를 찾아서
+
+그것이 true라면 redirect 가 이뤄져야한다.
+
+const c = dispatch(registerUser(body))
+        c.payload.then(data => {
+            if(data.success){
+                navigator("/login")
+            }else{
+                alert("에러가 발생하였습니다.")
+            }
+        })
