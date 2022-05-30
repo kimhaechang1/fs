@@ -4,6 +4,7 @@ import {useDispatch} from 'react-redux'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
 import {loginUser} from '../../../_action/user_action'
+import auth from '../../../hoc/auth'
 function LoginPage(props) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -63,4 +64,4 @@ function LoginPage(props) {
     );
 }
 
-export default LoginPage;
+export default auth(LoginPage,false);

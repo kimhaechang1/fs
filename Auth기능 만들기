@@ -117,3 +117,196 @@ auth가 true라는것은 즉 문제없이 user정보가 넘어온 것 이다.
 }) 해주고
 
 내용으로 json 형식을 통해 req 객체 프로퍼티로 넘어온 유저정보를 하나하나 결과값으로 도출해낸다.
+
+
+
+프론트 쪽 Auth 기능만들기
+
+Authentication Check!
+
+페이지에는 다양한 종류가 있다.
+
+그 기준을 auth로 잡는다면
+
+1. 아무나 진입 가능한 페이지
+ex) LandingPage, AboutPage
+
+2. 로그인한 회원만 진입 가능한 페이지
+ex) DetailPage, 마이페이지 등등..
+
+3. 로그인 한 회원은 진입 못하는 페이지
+ex) RegisterPage, LoginPage
+
+4. 관리자만 입장 가능한 페이지
+ex) AdminPage
+
+댓글 작성, 파일 전송에도 인증이 필요 할 수 있다.
+
+이러한 것들은 HOC (higher-order component) 고차 컴포넌트를 사용해야한다.
+
+HOC는 컴포넌트를 입력받아 새로운 컴포넌트로 return 하는 함수이다.
+
+const EnhancedComponent = higherOrderComponent(WrappedComponent)
+
+ex)
+
+Auth라는 컴포넌트가 HOC라고 하고 그 내부에 Logged in component 로 admin 사용자가 볼 수 있는 컴포넌트가 있다고 하자
+
+여기서 해당유저가 Logged in component를 사용하는 페이지로 들어갈 자격이 되는지를 
+
+고차 컴포넌트인 Auth에서 확인 한 후 자격이 된다면 해당 컴포넌트를 실행하고 자격이 없다면 다른 페이지로 리다이렉트 해버린다.
+
+우리의 컴포넌트 기준으로는 모든 Component(LandingPage, LoginPage, registerPage)를 HOC에 넣을 것이다.
+
+예를들어 랜딩페이지에 진입하는 경우 고차 컴포넌트인 Auth에서 백엔드로 리퀘스트를 보내어
+
+해당 유저의 상태(즉, 유저의 데이터)를 받아온다.
+
+랜딩페이지는 이때 아무나 들어와도 상관없으므로 정상적으로 라우팅에 성공한다.
+
+하지만 어드민 페이지에 진입하는 경우 마찬가지로 고차컴포넌트인 Auth에서 백엔드로 리퀘스트를 보내고
+
+받아온 상태에서 해당 유저의 등급이 어드민이 아니므로 Auth에서 판단하여 다른 페이지로 랜딩하게 된다.
+
+또한 로그인 페이지의 경우 똑같이 Auth에서 상태를 받아온 후 로그인이 아직 안된 유저라면
+
+로그인 페이지를 정상적으로 라우팅 해주지만, 로그인이 이미 되어있는 유저라면 필요없으므로 다른페이지를 랜딩한다.
+
+따라서 Auth 컴포넌트를 만들어서 프론트쪽 모든 컴포넌트를 넣어주어 인증을 각각 진행해 준다.
+
+Auth컴포넌트는 /hoc/auth.js를 통해 생성한다.
+
+그리고 기본적인 틀을 갖추는데 이 때 redux를 활용하여 상태값을 바꿀 것이다.
+
+import {useDispatch} from 'react-redux'
+import react, {useEffect}from 'react'
+import {axios} from 'axios'
+import {auth} from '../_action/user_action'
+export default function(SpecificComponent, option, adminRoute = null){
+    function AuthenticationCheck(props){
+        const dispatch = useDispatch()
+        useEffect(()=>{
+            dispatch(auth()).then(res =>{
+                console.log(res)
+            })
+        },[])
+        return (
+            <SpecificComponent/>
+        )
+    }
+
+    return AuthenticationCheck
+}
+
+
+고차 컴포넌트는 컴포넌트를 인자로 받으므로 specificComponent라는 매게변수를 주었고
+
+return 으로는 리액트 컴포넌트를 return 해야 하므로 내부함수가 쓰이게 된다
+
+따라서 외부 함수의 return 값은 내부함수 그 자체를 불러오게 한다.
+
+또한 내부함수의 return 값은 당연히 들어온 컴포넌트를 return 해주어야 한다.
+
+option은 내가 커스터마이징 하기를 
+
+null일 경우 아무나 다 들어갈 수 있음
+true일 경우 로그인 한 유저만
+false일 경우 로그인 한 유저는 못들어감
+
+으로 설정 할 것이다.
+
+마지막 매게변수인 adminRoute=null 은 기본값 null을 통해 null이라면 유저의 등급에 상관 없다는 것 이고
+
+null이 아닌 true가 들어간다면 admin 권한을 가지고 있는 유저만 들어갈 수 있다.
+
+우선 페이지가 렌더링 될 때마다, 즉 HOC인 Auth에 새로운 컴포넌트가 들어올 때마다 실행 되어야 하므로
+
+useEffect(()=>{
+    
+})
+를 사용한다.
+
+또한 redux를 사용하여 상태값(request의 결과값)을 조정하기 위해 action dispatch를 해줘야 한다.
+
+여기서 해당 action의 type은 auth_user이고 그 액션에 대한 함수는 auth이므로 user_action에 정의되어 있는 auth를 import 해온다.
+
+user_action에서는 type에서 action의 type명인 AUTH_USER에 대해 정의 후 export 해준다.
+
+그리고 새로운 action 대한 auth function은 axios.get을 통해 백엔드의 auth api에 request를 보내야 한다.
+
+보내고 난 후의 data를 payload에 담아 return한다.
+
+그러고 난 뒤 reducers에서는 새로운 type에 대한 switch문을 추가 한 후
+
+그 내부에 백엔드에서 넘어온 user의 데이터를 받아 userData에 넣어서 return 한다.
+
+그리고 return되어서 오게 될 데이터를 console.log를 통해 화면에 출력해본다.
+
+최종적으로 내부함수 AuthenticationCheck의 return 값은 외부함수에서 인자로 들어온 컴포넌트를 return 해주어야 한다.
+
+...
+return <SpecificComponent/>
+...
+
+이렇게 정의한 Auth HOC는 각각의 컴포넌트에서 option 값을 넣어주어 export때 감싸준다.
+
+이제 react의 useNavigate를 통해 여러 경우의 수 마다 리다이렉션을 걸어야 한다.
+
+경우의 수로 따진다면 크게 로그인 한 유저 or 로그인 안한 유저 로 볼 수 있다.
+
+1. 로그인을 안한 유저
+
+로그인을 안한 유저라면 우선 로그인 안한 유저가 들어갈수 없는 페이지(option===true)에 들어가지 못하게 막아야한다.
+
+2. 로그인을 한 유저
+
+로그인을 한 일반 유저가 어드민만 접속가능한 페이지(adminRoute===true)에 접속하려 한다면 들어가지 못하게 막아야한다.
+
+또한 로그인 한 일반유저가 로그인을 안한 유저가 들어가야할 페이지(option===false)에 접속하지 못하게 막아야한다.
+
+이것을 직접 구현하면 다음과 같다.
+
+export default function(SpecificComponent, option, adminRoute){
+    function AuthenticationCheck(props){
+        const navigate = useNavigate()
+        const dispatch = useDispatch()
+        useEffect(()=>{
+            dispatch(auth()).payload.then(res=>{
+                if(!res.isAuth){
+                    if(option){
+                        navigate("/login")
+                    }
+                }else{
+                    if(adminRoute && !isAdmin){
+                        navigate("/")
+                    }else{
+                        if(!option){
+                            navigate("/")
+                        }
+                    }
+                }
+            })
+        },[])
+        return (
+            <SpecificComponent/>
+        )
+    }
+    return AuthenticationCheck
+}
+
+
+위의 코드에서
+
+로그인을 안한 사람 중 로그인을 한 사람만 들어 갈 수 있는 페이지에 접속하려 한다면 login페이지로 라우팅해준다.
+
+반면 로그인을 한 사람인데 어드민 페이지에 접속하려 하거나, 어드민 페이지는 아닌데 로그인 안한사람만 들어갈 수 있는 페이지에 들어가려 한다면
+
+루트 라우팅을 해준다.
+
+
+
+
+
+
+
+
